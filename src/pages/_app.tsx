@@ -1,6 +1,7 @@
 import type { AppProps } from "next/app";
 import Image from "next/future/image";
 import Head from "next/head";
+import Link from "next/link";
 import { Fragment } from "react";
 import logo from "../assets/logo.svg";
 import { globalStyles } from "../styles/global";
@@ -16,7 +17,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => (
 
     <Container>
       <Header>
-        <Image src={logo} alt="" />
+        <Link href="/" prefetch={false}>
+          <a>
+            <Image src={logo} alt="Ignite Shop" />
+          </a>
+        </Link>
       </Header>
 
       <Component {...pageProps} />
