@@ -11,8 +11,7 @@ interface Product {
   id: string;
   name: string;
   imageUrl: string;
-  price: number;
-  priceFormatted: string;
+  price: string;
 }
 
 interface HomeProps {
@@ -24,18 +23,16 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     expand: ["data.default_price"],
   });
 
-  const products = response.data.map((product): Product => {
-    const price =
-      ((product.default_price as Stripe.Price).unit_amount || 0) / 100;
-
-    return {
+  const products = response.data.map(
+    (product): Product => ({
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
-      price,
-      priceFormatted: formatPrice(price),
-    };
-  });
+      price: formatPrice(
+        ((product.default_price as Stripe.Price).unit_amount || 0) / 100,
+      ),
+    }),
+  );
 
   return {
     revalidate: 60 * 60 * 2, // 2 hours
@@ -65,7 +62,7 @@ const Home: NextPage<HomeProps> = ({ products }) => {
 
           <footer>
             <strong>{product.name}</strong>
-            <span>{product.priceFormatted}</span>
+            <span>{product.price}</span>
           </footer>
         </Product>
       ))}
