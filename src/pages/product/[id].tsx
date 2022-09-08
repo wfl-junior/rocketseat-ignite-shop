@@ -29,7 +29,7 @@ export const getStaticPaths: GetStaticPaths<ProductParams> = async () => {
   const response = await stripe.products.list();
 
   return {
-    fallback: false,
+    fallback: "blocking",
     paths: response.data.map(product => ({
       params: {
         id: product.id,
@@ -42,25 +42,33 @@ export const getStaticProps: GetStaticProps<
   ProductProps,
   ProductParams
 > = async ({ params }) => {
-  const productId = params!.id;
-  const product = await stripe.products.retrieve(productId, {
-    expand: ["default_price"],
-  });
+  try {
+    const productId = params!.id;
+    const product = await stripe.products.retrieve(productId, {
+      expand: ["default_price"],
+    });
 
-  return {
-    revalidate: 60 * 60, // 1 hour
-    props: {
-      product: {
-        id: product.id,
-        name: product.name,
-        imageUrl: product.images[0],
-        description: product.description || "",
-        price: formatPrice(
-          ((product.default_price as Stripe.Price).unit_amount || 0) / 100,
-        ),
+    return {
+      revalidate: 60 * 60, // 1 hour
+      props: {
+        product: {
+          id: product.id,
+          name: product.name,
+          imageUrl: product.images[0],
+          description: product.description || "",
+          price: formatPrice(
+            ((product.default_price as Stripe.Price).unit_amount || 0) / 100,
+          ),
+        },
       },
-    },
-  };
+    };
+  } catch (error) {
+    console.log(error);
+
+    return {
+      notFound: true,
+    };
+  }
 };
 
 const Product: NextPage<ProductProps> = ({ product }) => (
@@ -71,6 +79,7 @@ const Product: NextPage<ProductProps> = ({ product }) => (
         width={520}
         height={480}
         alt={product.name}
+        priority
       />
     </ImageContainer>
 
