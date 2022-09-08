@@ -1,4 +1,4 @@
-import type { GetStaticProps, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Image from "next/image";
 import Stripe from "stripe";
 import { stripe } from "../../services/stripe";
@@ -25,6 +25,19 @@ type ProductParams = {
   id: string;
 };
 
+export const getStaticPaths: GetStaticPaths<ProductParams> = async () => {
+  const response = await stripe.products.list();
+
+  return {
+    fallback: false,
+    paths: response.data.map(product => ({
+      params: {
+        id: product.id,
+      },
+    })),
+  };
+};
+
 export const getStaticProps: GetStaticProps<
   ProductProps,
   ProductParams
@@ -41,7 +54,7 @@ export const getStaticProps: GetStaticProps<
         id: product.id,
         name: product.name,
         imageUrl: product.images[0],
-        description: product.description!,
+        description: product.description || "",
         price: formatPrice(
           ((product.default_price as Stripe.Price).unit_amount || 0) / 100,
         ),
