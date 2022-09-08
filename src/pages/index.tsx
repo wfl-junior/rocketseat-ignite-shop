@@ -1,28 +1,30 @@
 import type { NextPage } from "next";
-import { styled } from "../styles";
-
-const Button = styled("button", {
-  backgroundColor: "$green500",
-  color: "$white",
-  borderRadius: 4,
-  border: 0,
-  padding: "0.25rem 0.5rem",
-  cursor: "pointer",
-
-  span: {
-    fontWeight: "bold",
-  },
-
-  "&:hover": {
-    filter: "brightness(0.8)",
-  },
-});
+import Image from "next/future/image";
+import camiseta1 from "../assets/camisetas/1.png";
+import camiseta2 from "../assets/camisetas/2.png";
+import { HomeContainer, Product } from "../styles/pages/home";
+// import camiseta3 from '../assets/camisetas/3.png';
 
 const Home: NextPage = () => (
-  <Button>
-    <span>Teste</span>
-    &nbsp;Enviar
-  </Button>
+  <HomeContainer>
+    <Product>
+      <Image src={camiseta1} width={520} height={480} alt="" priority />
+
+      <footer>
+        <strong>Camiseta X</strong>
+        <span>R$ 79,90</span>
+      </footer>
+    </Product>
+
+    <Product>
+      <Image src={camiseta2} width={520} height={480} alt="" priority />
+
+      <footer>
+        <strong>Camiseta X</strong>
+        <span>R$ 79,90</span>
+      </footer>
+    </Product>
+  </HomeContainer>
 );
 
 export default Home;

@@ -7,9 +7,9 @@ export const globalStyles = globalCss({
     boxSizing: "border-box",
   },
   body: {
-    "-webkit-font-smoothing": "antialised",
-    backgroundColor: "$gray900",
     color: "$gray100",
+    backgroundColor: "$gray900",
+    "-webkit-font-smoothing": "antialised",
   },
   "body, input, textarea, button, select": {
     font: "400 1rem Roboto, sans-serif",
