@@ -2,6 +2,7 @@ import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import type { GetStaticProps, NextPage } from "next";
 import Image from "next/future/image";
+import Link from "next/link";
 import Stripe from "stripe";
 import { stripe } from "../services/stripe";
 import { HomeContainer, Product } from "../styles/pages/home";
@@ -51,20 +52,22 @@ const Home: NextPage<HomeProps> = ({ products }) => {
   return (
     <HomeContainer ref={sliderRef} className="keen-slider">
       {products.map(product => (
-        <Product key={product.id} className="keen-slider__slide">
-          <Image
-            src={product.imageUrl}
-            width={520}
-            height={480}
-            alt=""
-            priority
-          />
+        <Link key={product.id} href={`/product/${product.id}`} passHref>
+          <Product className="keen-slider__slide">
+            <Image
+              src={product.imageUrl}
+              width={520}
+              height={480}
+              alt=""
+              priority
+            />
 
-          <footer>
-            <strong>{product.name}</strong>
-            <span>{product.price}</span>
-          </footer>
-        </Product>
+            <footer>
+              <strong>{product.name}</strong>
+              <span>{product.price}</span>
+            </footer>
+          </Product>
+        </Link>
       ))}
     </HomeContainer>
   );
