@@ -1,6 +1,7 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Image from "next/future/image";
-import { useState } from "react";
+import Head from "next/head";
+import { Fragment, useState } from "react";
 import Stripe from "stripe";
 import { api } from "../../services/api";
 import { stripe } from "../../services/stripe";
@@ -95,27 +96,33 @@ const Product: NextPage<ProductProps> = ({ product }) => {
   }
 
   return (
-    <ProductContainer>
-      <ImageContainer>
-        <Image
-          src={product.imageUrl}
-          width={520}
-          height={480}
-          alt={product.name}
-          priority
-        />
-      </ImageContainer>
+    <Fragment>
+      <Head>
+        <title>{`${product.name} | Ignite Shop`}</title>
+      </Head>
 
-      <ProductDetails>
-        <h1>{product.name}</h1>
-        <span>{product.price}</span>
-        <p>{product.description}</p>
+      <ProductContainer>
+        <ImageContainer>
+          <Image
+            src={product.imageUrl}
+            width={520}
+            height={480}
+            alt={product.name}
+            priority
+          />
+        </ImageContainer>
 
-        <button onClick={handleCheckout} disabled={isLoading}>
-          Comprar agora
-        </button>
-      </ProductDetails>
-    </ProductContainer>
+        <ProductDetails>
+          <h1>{product.name}</h1>
+          <span>{product.price}</span>
+          <p>{product.description}</p>
+
+          <button onClick={handleCheckout} disabled={isLoading}>
+            Comprar agora
+          </button>
+        </ProductDetails>
+      </ProductContainer>
+    </Fragment>
   );
 };
 

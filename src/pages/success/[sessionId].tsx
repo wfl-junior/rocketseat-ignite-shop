@@ -1,6 +1,8 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Image from "next/future/image";
+import Head from "next/head";
 import Link from "next/link";
+import { Fragment } from "react";
 import Stripe from "stripe";
 import { stripe } from "../../services/stripe";
 import { ImageContainer, SuccessContainer } from "../../styles/pages/success";
@@ -47,26 +49,33 @@ export const getServerSideProps: GetServerSideProps<
 };
 
 const Success: NextPage<SuccessProps> = ({ customerName, product }) => (
-  <SuccessContainer>
-    <h1>Compra efetuada!</h1>
+  <Fragment>
+    <Head>
+      <title>Compra efetuada | Ignite Shop</title>
+      <meta name="robots" content="noindex" />
+    </Head>
 
-    <ImageContainer>
-      <Image
-        src={product.imageUrl}
-        width={120}
-        height={110}
-        alt={product.name}
-        priority
-      />
-    </ImageContainer>
+    <SuccessContainer>
+      <h1>Compra efetuada!</h1>
 
-    <p>
-      Uhuul <strong>{customerName}</strong>, sua <strong>{product.name}</strong>{" "}
-      já está a caminho da sua casa.
-    </p>
+      <ImageContainer>
+        <Image
+          src={product.imageUrl}
+          width={120}
+          height={110}
+          alt={product.name}
+          priority
+        />
+      </ImageContainer>
 
-    <Link href="/">Voltar ao catálogo</Link>
-  </SuccessContainer>
+      <p>
+        Uhuul <strong>{customerName}</strong>, sua{" "}
+        <strong>{product.name}</strong> já está a caminho da sua casa.
+      </p>
+
+      <Link href="/">Voltar ao catálogo</Link>
+    </SuccessContainer>
+  </Fragment>
 );
 
 export default Success;
