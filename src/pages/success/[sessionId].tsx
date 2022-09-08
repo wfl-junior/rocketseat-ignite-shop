@@ -38,7 +38,10 @@ export const getServerSideProps: GetServerSideProps<
     console.log(error);
 
     return {
-      notFound: true,
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
     };
   }
 };
