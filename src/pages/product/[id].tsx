@@ -15,6 +15,7 @@ interface Product {
   imageUrl: string;
   price: string;
   description: string;
+  defaultPriceId: string;
 }
 
 interface ProductProps {
@@ -48,6 +49,8 @@ export const getStaticProps: GetStaticProps<
       expand: ["default_price"],
     });
 
+    const defaultPrice = product.default_price as Stripe.Price;
+
     return {
       revalidate: 60 * 60, // 1 hour
       props: {
@@ -56,9 +59,8 @@ export const getStaticProps: GetStaticProps<
           name: product.name,
           imageUrl: product.images[0],
           description: product.description || "",
-          price: formatPrice(
-            ((product.default_price as Stripe.Price).unit_amount || 0) / 100,
-          ),
+          price: formatPrice((defaultPrice.unit_amount || 0) / 100),
+          defaultPriceId: defaultPrice.id,
         },
       },
     };
@@ -71,25 +73,31 @@ export const getStaticProps: GetStaticProps<
   }
 };
 
-const Product: NextPage<ProductProps> = ({ product }) => (
-  <ProductContainer>
-    <ImageContainer>
-      <Image
-        src={product.imageUrl}
-        width={520}
-        height={480}
-        alt={product.name}
-        priority
-      />
-    </ImageContainer>
+const Product: NextPage<ProductProps> = ({ product }) => {
+  async function handleCheckout() {
+    console.log(product.defaultPriceId);
+  }
 
-    <ProductDetails>
-      <h1>{product.name}</h1>
-      <span>{product.price}</span>
-      <p>{product.description}</p>
-      <button>Comprar agora</button>
-    </ProductDetails>
-  </ProductContainer>
-);
+  return (
+    <ProductContainer>
+      <ImageContainer>
+        <Image
+          src={product.imageUrl}
+          width={520}
+          height={480}
+          alt={product.name}
+          priority
+        />
+      </ImageContainer>
+
+      <ProductDetails>
+        <h1>{product.name}</h1>
+        <span>{product.price}</span>
+        <p>{product.description}</p>
+        <button onClick={handleCheckout}>Comprar agora</button>
+      </ProductDetails>
+    </ProductContainer>
+  );
+};
 
 export default Product;
