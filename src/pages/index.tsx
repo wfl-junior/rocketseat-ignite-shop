@@ -1,15 +1,50 @@
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Image from "next/future/image";
-import camiseta1 from "../assets/camisetas/1.png";
-import camiseta2 from "../assets/camisetas/2.png";
-import camiseta3 from "../assets/camisetas/3.png";
-import camiseta4 from "../assets/camisetas/4.png";
-import camiseta5 from "../assets/camisetas/5.png";
+import Stripe from "stripe";
+import { stripe } from "../services/stripe";
 import { HomeContainer, Product } from "../styles/pages/home";
+import { formatPrice } from "../utils/formatPrice";
 
-const Home: NextPage = () => {
+interface Product {
+  id: string;
+  name: string;
+  imageUrl: string;
+  price: number;
+  priceFormatted: string;
+}
+
+interface HomeProps {
+  products: Product[];
+}
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  const response = await stripe.products.list({
+    expand: ["data.default_price"],
+  });
+
+  const products = response.data.map((product): Product => {
+    const price =
+      ((product.default_price as Stripe.Price).unit_amount || 0) / 100;
+
+    return {
+      id: product.id,
+      name: product.name,
+      imageUrl: product.images[0],
+      price,
+      priceFormatted: formatPrice(price),
+    };
+  });
+
+  return {
+    props: {
+      products,
+    },
+  };
+};
+
+const Home: NextPage<HomeProps> = ({ products }) => {
   const [sliderRef] = useKeenSlider({
     slides: {
       perView: 3,
@@ -19,50 +54,22 @@ const Home: NextPage = () => {
 
   return (
     <HomeContainer ref={sliderRef} className="keen-slider">
-      <Product className="keen-slider__slide">
-        <Image src={camiseta1} width={520} height={480} alt="" priority />
+      {products.map(product => (
+        <Product key={product.id} className="keen-slider__slide">
+          <Image
+            src={product.imageUrl}
+            width={520}
+            height={480}
+            alt=""
+            priority
+          />
 
-        <footer>
-          <strong>Camiseta 1</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={camiseta2} width={520} height={480} alt="" priority />
-
-        <footer>
-          <strong>Camiseta 2</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={camiseta3} width={520} height={480} alt="" priority />
-
-        <footer>
-          <strong>Camiseta 3</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={camiseta4} width={520} height={480} alt="" priority />
-
-        <footer>
-          <strong>Camiseta 4</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={camiseta5} width={520} height={480} alt="" priority />
-
-        <footer>
-          <strong>Camiseta 5</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
+          <footer>
+            <strong>{product.name}</strong>
+            <span>{product.priceFormatted}</span>
+          </footer>
+        </Product>
+      ))}
     </HomeContainer>
   );
 };
