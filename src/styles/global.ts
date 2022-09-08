@@ -1,6 +1,9 @@
 import { globalCss } from ".";
 
 export const globalStyles = globalCss({
+  ":root": {
+    "--image-gradient": "linear-gradient(180deg, #1ea483 0%, #7465d4 100%)",
+  },
   "*, *::before, *::after": {
     margin: 0,
     padding: 0,

@@ -1,5 +1,5 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Image from "next/image";
+import Image from "next/future/image";
 import { useState } from "react";
 import Stripe from "stripe";
 import { api } from "../../services/api";
