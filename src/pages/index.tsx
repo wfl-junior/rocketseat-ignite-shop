@@ -58,7 +58,7 @@ const Home: NextPage<HomeProps> = ({ products }) => {
               src={product.imageUrl}
               width={520}
               height={480}
-              alt=""
+              alt={product.name}
               priority
             />
 

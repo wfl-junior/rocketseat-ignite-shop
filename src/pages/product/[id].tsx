@@ -1,33 +1,70 @@
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
+import Stripe from "stripe";
+import { stripe } from "../../services/stripe";
 import {
   ImageContainer,
   ProductContainer,
   ProductDetails,
 } from "../../styles/pages/product";
+import { formatPrice } from "../../utils/formatPrice";
 
-const Product: NextPage = () => (
+interface Product {
+  id: string;
+  name: string;
+  imageUrl: string;
+  price: string;
+  description: string;
+}
+
+interface ProductProps {
+  product: Product;
+}
+
+type ProductParams = {
+  id: string;
+};
+
+export const getStaticProps: GetStaticProps<
+  ProductProps,
+  ProductParams
+> = async ({ params }) => {
+  const productId = params!.id;
+  const product = await stripe.products.retrieve(productId, {
+    expand: ["default_price"],
+  });
+
+  return {
+    revalidate: 60 * 60, // 1 hour
+    props: {
+      product: {
+        id: product.id,
+        name: product.name,
+        imageUrl: product.images[0],
+        description: product.description!,
+        price: formatPrice(
+          ((product.default_price as Stripe.Price).unit_amount || 0) / 100,
+        ),
+      },
+    },
+  };
+};
+
+const Product: NextPage<ProductProps> = ({ product }) => (
   <ProductContainer>
     <ImageContainer>
       <Image
-        src="https://files.stripe.com/links/MDB8YWNjdF8xTGZaWUVDY2cyeEx1SEVlfGZsX3Rlc3RfZjhOTVdRMXJFWm9WVDhXMDdTNG5YR3pI00PzaIN1BF"
+        src={product.imageUrl}
         width={520}
         height={480}
-        alt=""
+        alt={product.name}
       />
     </ImageContainer>
 
     <ProductDetails>
-      <h1>Camiseta X</h1>
-      <span>R$ 79,90</span>
-
-      <p>
-        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa alias, at
-        laborum magni, provident similique laboriosam nihil corrupti expedita
-        explicabo ducimus, odio id exercitationem consequatur soluta amet atque
-        sapiente inventore!
-      </p>
-
+      <h1>{product.name}</h1>
+      <span>{product.price}</span>
+      <p>{product.description}</p>
       <button>Comprar agora</button>
     </ProductDetails>
   </ProductContainer>
