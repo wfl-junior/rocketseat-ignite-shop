@@ -1,6 +1,8 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Image from "next/image";
+import { useState } from "react";
 import Stripe from "stripe";
+import { api } from "../../services/api";
 import { stripe } from "../../services/stripe";
 import {
   ImageContainer,
@@ -74,8 +76,22 @@ export const getStaticProps: GetStaticProps<
 };
 
 const Product: NextPage<ProductProps> = ({ product }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   async function handleCheckout() {
-    console.log(product.defaultPriceId);
+    setIsLoading(true);
+
+    try {
+      const { data } = await api.post<{ checkoutUrl: string }>("/checkout", {
+        priceId: product.defaultPriceId,
+      });
+
+      window.location.href = data.checkoutUrl;
+    } catch (error) {
+      setIsLoading(false);
+      console.log(error);
+      alert("Falha ao redirecionar ao checkout!");
+    }
   }
 
   return (
@@ -94,7 +110,10 @@ const Product: NextPage<ProductProps> = ({ product }) => {
         <h1>{product.name}</h1>
         <span>{product.price}</span>
         <p>{product.description}</p>
-        <button onClick={handleCheckout}>Comprar agora</button>
+
+        <button onClick={handleCheckout} disabled={isLoading}>
+          Comprar agora
+        </button>
       </ProductDetails>
     </ProductContainer>
   );
