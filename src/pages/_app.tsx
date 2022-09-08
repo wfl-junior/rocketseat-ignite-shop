@@ -1,4 +1,5 @@
 import type { AppProps } from "next/app";
+import Image from "next/future/image";
 import Head from "next/head";
 import { Fragment } from "react";
 import logo from "../assets/logo.svg";
@@ -15,7 +16,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => (
 
     <Container>
       <Header>
-        <img src={logo.src} alt="" />
+        <Image src={logo} alt="" />
       </Header>
 
       <Component {...pageProps} />
