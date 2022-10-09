@@ -1,11 +1,12 @@
 import type { AppProps } from "next/app";
-import Image from "next/future/image";
 import Head from "next/head";
-import Link from "next/link";
+import NextNProgress from "nextjs-progressbar";
 import { Fragment } from "react";
-import logo from "../assets/logo.svg";
+import { CartDrawer } from "../components/CartDrawer";
+import { Header } from "../components/Header";
+import { CartDrawerContextProvider } from "../contexts/CartDrawerContext";
 import { globalStyles } from "../styles/global";
-import { Container, Header } from "../styles/pages/app";
+import { Container } from "../styles/pages/app";
 
 globalStyles();
 
@@ -15,14 +16,18 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => (
       <title>Ignite Shop</title>
     </Head>
 
+    <NextNProgress
+      color="var(--colors-green500)"
+      height={2}
+      options={{ showSpinner: false }}
+      stopDelayMs={50}
+    />
+
     <Container>
-      <Header>
-        <Link href="/" prefetch={false}>
-          <a>
-            <Image src={logo} alt="Ignite Shop" />
-          </a>
-        </Link>
-      </Header>
+      <CartDrawerContextProvider>
+        <Header />
+        <CartDrawer />
+      </CartDrawerContextProvider>
 
       <Component {...pageProps} />
     </Container>
