@@ -9,6 +9,7 @@ export const SuccessContainer = styled("main", {
   height: 656,
 
   h1: {
+    marginTop: "3rem",
     fontSize: "$2xl",
     color: "$gray100",
   },
@@ -19,12 +20,12 @@ export const SuccessContainer = styled("main", {
     lineHeight: 1.4,
     maxWidth: 560,
     textAlign: "center",
-    marginTop: "2rem",
+    marginTop: "1.5rem",
   },
 
   a: {
     display: "block",
-    marginTop: "5rem",
+    marginTop: "4rem",
     fontSize: "$lg",
     color: "$green500",
     textDecoration: "none",
@@ -38,20 +39,29 @@ export const SuccessContainer = styled("main", {
   },
 });
 
+export const ImagesContainer = styled("div", {
+  display: "flex",
+  alignItems: "center",
+});
+
 export const ImageContainer = styled("div", {
-  width: "100%",
-  maxWidth: 130,
-  height: 145,
+  aspectRatio: "1 / 1",
+  width: 140,
   background: "var(--image-gradient)",
-  borderRadius: 8,
+  borderRadius: "50%",
   padding: "0.25rem",
-  marginTop: "4rem",
 
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 
+  boxShadow: "0 0 60px rgb(0 0 0 / 0.8)",
+
   img: {
     objectFit: "cover",
+  },
+
+  "&:not(:first-child)": {
+    marginLeft: "-3.25rem",
   },
 });

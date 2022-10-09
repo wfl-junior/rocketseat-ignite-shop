@@ -4,6 +4,7 @@ import NextNProgress from "nextjs-progressbar";
 import { Fragment } from "react";
 import { CartDrawer } from "../components/CartDrawer";
 import { Header } from "../components/Header";
+import { CartContextProvider } from "../contexts/CartContext";
 import { CartDrawerContextProvider } from "../contexts/CartDrawerContext";
 import { globalStyles } from "../styles/global";
 import { Container } from "../styles/pages/app";
@@ -24,12 +25,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => (
     />
 
     <Container>
-      <CartDrawerContextProvider>
-        <Header />
-        <CartDrawer />
-      </CartDrawerContextProvider>
+      <CartContextProvider>
+        <CartDrawerContextProvider>
+          <Header />
+          <CartDrawer />
+        </CartDrawerContextProvider>
 
-      <Component {...pageProps} />
+        <Component {...pageProps} />
+      </CartContextProvider>
     </Container>
   </Fragment>
 );

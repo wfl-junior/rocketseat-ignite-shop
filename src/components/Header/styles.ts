@@ -45,7 +45,7 @@ export const CartButton = styled("button", {
     },
   },
 
-  "&:hover": {
+  "&:enabled:hover": {
     filter: "brightness(0.9)",
   },
 });

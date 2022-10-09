@@ -1,4 +1,4 @@
-import { styled } from "../../styles";
+import { keyframes, styled } from "../../styles";
 
 export const CartDrawerContainer = styled("aside", {
   backgroundColor: "$gray800",
@@ -66,20 +66,29 @@ export const Items = styled("div", {
   flex: 1,
   marginBlock: "2rem",
   overflowY: "auto",
+  display: "flex",
+  flexDirection: "column",
+  gap: "1.5rem",
 
-  // "&::webkit-scrollbar": {
-  //   width: "1rem",
-  // },
+  "&::-webkit-scrollbar": {
+    width: "0.375rem",
+  },
 
-  // "&::webkit-scrollbar-track": {
-  //   backgroundColor: "$green500",
-  //   borderRadius: "100vmax",
-  // },
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: "$green500",
+    borderRadius: "100vmax",
+  },
 
-  // "&::webkit-scrollbar-thumb": {
-  //   backgroundColor: "$green300",
-  //   borderRadius: "100vmax",
-  // },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: "$green300",
+    borderRadius: "100vmax",
+  },
+});
+
+export const NoItemsMessage = styled("p", {
+  fontSize: "1rem",
+  fontWeight: "400",
+  color: "$gray300",
 });
 
 export const Summary = styled("div", {
@@ -112,6 +121,15 @@ export const Price = styled("span", {
   fontSize: "1.5rem",
 });
 
+const spin = keyframes({
+  from: {
+    rotate: "0deg",
+  },
+  to: {
+    rotate: "360deg",
+  },
+});
+
 export const PurchaseButton = styled("button", {
   width: "100%",
   borderRadius: 8,
@@ -126,7 +144,16 @@ export const PurchaseButton = styled("button", {
 
   transition: "background-color 200ms linear",
 
-  "&:hover": {
+  "&:enabled:hover": {
     backgroundColor: "$green300",
+  },
+
+  "&:disabled": {
+    opacity: 0.6,
+    cursor: "not-allowed",
+  },
+
+  svg: {
+    animation: `${spin} 700ms linear infinite`,
   },
 });

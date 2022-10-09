@@ -1,10 +1,15 @@
-import { X } from "phosphor-react";
+import { CircleNotch, X } from "phosphor-react";
+import { useMemo, useState } from "react";
+import { useCartContext } from "../../contexts/CartContext";
 import { useCartDrawerContext } from "../../contexts/CartDrawerContext";
+import { api } from "../../services/api";
+import { formatPrice } from "../../utils/formatPrice";
 import { CartItem } from "../CartItem";
 import {
   CartDrawerContainer,
   CloseButton,
   Items,
+  NoItemsMessage,
   Price,
   PurchaseButton,
   Quantity,
@@ -15,7 +20,30 @@ import {
 } from "./styles";
 
 export const CartDrawer: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { isOpen, close } = useCartDrawerContext();
+  const { items, clearItems } = useCartContext();
+
+  const totalPrice = useMemo((): string => {
+    return formatPrice(items.reduce((total, item) => total + item.price, 0));
+  }, [items]);
+
+  async function handleCheckout() {
+    setIsLoading(true);
+
+    try {
+      const { data } = await api.post<{ checkoutUrl: string }>("/checkout", {
+        priceIds: items.map(item => item.defaultPriceId),
+      });
+
+      clearItems();
+      window.location.href = data.checkoutUrl;
+    } catch (error) {
+      setIsLoading(false);
+      console.log(error);
+      alert("Falha ao redirecionar ao checkout!");
+    }
+  }
 
   return (
     <CartDrawerContainer variant={isOpen ? "open" : "closed"}>
@@ -26,30 +54,28 @@ export const CartDrawer: React.FC = () => {
       <Title>Sacola de compras</Title>
 
       <Items>
-        <CartItem
-          product={{
-            id: "1",
-            name: "Camiseta Beyond the Limits",
-            imageUrl:
-              "https://files.stripe.com/links/MDB8YWNjdF8xTGZaWUVDY2cyeEx1SEVlfGZsX3Rlc3RfRXZ3ak52TEZKZnoyOFNQU0xpTVJtbEM300ax8dvmaK",
-            price: "R$ 79,90",
-          }}
-        />
+        {items.length ? (
+          items.map(item => <CartItem key={item.id} product={item} />)
+        ) : (
+          <NoItemsMessage>Não há itens no seu carrinho.</NoItemsMessage>
+        )}
       </Items>
 
       <Summary>
         <QuantityContainer>
           <span>Quantidade</span>
-          <Quantity>3 itens</Quantity>
+          <Quantity>{items.length} itens</Quantity>
         </QuantityContainer>
 
         <TotalContainer>
           <span>Valor total</span>
-          <Price>R$ 270,00</Price>
+          <Price>{totalPrice}</Price>
         </TotalContainer>
       </Summary>
 
-      <PurchaseButton>Finalizar compra</PurchaseButton>
+      <PurchaseButton onClick={handleCheckout} disabled={isLoading}>
+        {isLoading ? <CircleNotch size={22} /> : "Finalizar compra"}
+      </PurchaseButton>
     </CartDrawerContainer>
   );
 };

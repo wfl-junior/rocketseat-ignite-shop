@@ -5,14 +5,19 @@ import Link from "next/link";
 import { Fragment } from "react";
 import Stripe from "stripe";
 import { stripe } from "../../services/stripe";
-import { ImageContainer, SuccessContainer } from "../../styles/pages/success";
+import {
+  ImageContainer,
+  ImagesContainer,
+  SuccessContainer,
+} from "../../styles/pages/success";
 
 interface SuccessProps {
   customerName: string;
-  product: {
+  products: Array<{
+    id: string;
     name: string;
     imageUrl: string;
-  };
+  }>;
 }
 
 export const getServerSideProps: GetServerSideProps<
@@ -24,16 +29,20 @@ export const getServerSideProps: GetServerSideProps<
       expand: ["line_items", "line_items.data.price.product"],
     });
 
-    const product = session.line_items!.data[0].price!
-      .product as Stripe.Product;
+    const products = session.line_items!.data.map(item => {
+      const product = item.price!.product as Stripe.Product;
+
+      return {
+        id: product.id,
+        name: product.name,
+        imageUrl: product.images[0],
+      };
+    });
 
     return {
       props: {
         customerName: session.customer_details!.name!,
-        product: {
-          name: product.name,
-          imageUrl: product.images[0],
-        },
+        products,
       },
     };
   } catch (error) {
@@ -48,7 +57,7 @@ export const getServerSideProps: GetServerSideProps<
   }
 };
 
-const Success: NextPage<SuccessProps> = ({ customerName, product }) => (
+const Success: NextPage<SuccessProps> = ({ customerName, products }) => (
   <Fragment>
     <Head>
       <title>Compra efetuada | Ignite Shop</title>
@@ -56,21 +65,25 @@ const Success: NextPage<SuccessProps> = ({ customerName, product }) => (
     </Head>
 
     <SuccessContainer>
+      <ImagesContainer>
+        {products.map(product => (
+          <ImageContainer key={product.id}>
+            <Image
+              src={product.imageUrl}
+              width={120}
+              height={110}
+              alt={product.name}
+              priority
+            />
+          </ImageContainer>
+        ))}
+      </ImagesContainer>
+
       <h1>Compra efetuada!</h1>
 
-      <ImageContainer>
-        <Image
-          src={product.imageUrl}
-          width={120}
-          height={110}
-          alt={product.name}
-          priority
-        />
-      </ImageContainer>
-
       <p>
-        Uhuul <strong>{customerName}</strong>, sua{" "}
-        <strong>{product.name}</strong> já está a caminho da sua casa.
+        Uhuul <strong>{customerName}</strong>, sua compra de {products.length}{" "}
+        camiseta{products.length !== 1 && "s"} já está a caminho da sua casa.
       </p>
 
       <Link href="/">Voltar ao catálogo</Link>

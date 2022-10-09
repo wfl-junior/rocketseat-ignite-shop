@@ -1,24 +1,17 @@
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import type { GetStaticProps, NextPage } from "next";
-import Image from "next/future/image";
 import Head from "next/head";
-import Link from "next/link";
 import { Fragment } from "react";
 import Stripe from "stripe";
+import { ProductCard } from "../components/ProductCard";
+import { CartProduct } from "../contexts/CartContext";
 import { stripe } from "../services/stripe";
-import { HomeContainer, Product } from "../styles/pages/home";
+import { HomeContainer } from "../styles/pages/home";
 import { formatPrice } from "../utils/formatPrice";
 
-interface Product {
-  id: string;
-  name: string;
-  imageUrl: string;
-  price: string;
-}
-
 interface HomeProps {
-  products: Product[];
+  products: CartProduct[];
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
@@ -26,16 +19,19 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     expand: ["data.default_price"],
   });
 
-  const products = response.data.map(
-    (product): Product => ({
+  const products = response.data.map((product): CartProduct => {
+    const defaultPrice = product.default_price as Stripe.Price;
+    const price = (defaultPrice.unit_amount || 0) / 100;
+
+    return {
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
-      price: formatPrice(
-        ((product.default_price as Stripe.Price).unit_amount || 0) / 100,
-      ),
-    }),
-  );
+      price,
+      priceFormatted: formatPrice(price),
+      defaultPriceId: defaultPrice.id,
+    };
+  });
 
   return {
     revalidate: 60 * 60 * 2, // 2 hours
@@ -59,27 +55,7 @@ const Home: NextPage<HomeProps> = ({ products }) => {
 
       <HomeContainer ref={sliderRef} className="keen-slider">
         {products.map(product => (
-          <Link
-            key={product.id}
-            href={`/product/${product.id}`}
-            prefetch={false}
-            passHref
-          >
-            <Product className="keen-slider__slide">
-              <Image
-                src={product.imageUrl}
-                width={520}
-                height={480}
-                alt={product.name}
-                priority
-              />
-
-              <footer>
-                <strong>{product.name}</strong>
-                <span>{product.price}</span>
-              </footer>
-            </Product>
-          </Link>
+          <ProductCard key={product.id} product={product} />
         ))}
       </HomeContainer>
     </Fragment>

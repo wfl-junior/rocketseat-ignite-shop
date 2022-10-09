@@ -1,9 +1,9 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Image from "next/future/image";
 import Head from "next/head";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import Stripe from "stripe";
-import { api } from "../../services/api";
+import { CartProduct, useCartContext } from "../../contexts/CartContext";
 import { stripe } from "../../services/stripe";
 import {
   ImageContainer,
@@ -12,13 +12,8 @@ import {
 } from "../../styles/pages/product";
 import { formatPrice } from "../../utils/formatPrice";
 
-interface Product {
-  id: string;
-  name: string;
-  imageUrl: string;
-  price: string;
+interface Product extends CartProduct {
   description: string;
-  defaultPriceId: string;
 }
 
 interface ProductProps {
@@ -53,6 +48,7 @@ export const getStaticProps: GetStaticProps<
     });
 
     const defaultPrice = product.default_price as Stripe.Price;
+    const price = (defaultPrice.unit_amount || 0) / 100;
 
     return {
       revalidate: 60 * 60, // 1 hour
@@ -62,7 +58,8 @@ export const getStaticProps: GetStaticProps<
           name: product.name,
           imageUrl: product.images[0],
           description: product.description || "",
-          price: formatPrice((defaultPrice.unit_amount || 0) / 100),
+          price,
+          priceFormatted: formatPrice(price),
           defaultPriceId: defaultPrice.id,
         },
       },
@@ -77,22 +74,17 @@ export const getStaticProps: GetStaticProps<
 };
 
 const Product: NextPage<ProductProps> = ({ product }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { addItem } = useCartContext();
 
-  async function handleCheckout() {
-    setIsLoading(true);
-
-    try {
-      const { data } = await api.post<{ checkoutUrl: string }>("/checkout", {
-        priceId: product.defaultPriceId,
-      });
-
-      window.location.href = data.checkoutUrl;
-    } catch (error) {
-      setIsLoading(false);
-      console.log(error);
-      alert("Falha ao redirecionar ao checkout!");
-    }
+  function handleAddToCart() {
+    addItem({
+      defaultPriceId: product.defaultPriceId,
+      id: product.id,
+      imageUrl: product.imageUrl,
+      name: product.name,
+      price: product.price,
+      priceFormatted: product.priceFormatted,
+    });
   }
 
   return (
@@ -117,9 +109,7 @@ const Product: NextPage<ProductProps> = ({ product }) => {
           <span>{product.price}</span>
           <p>{product.description}</p>
 
-          <button onClick={handleCheckout} disabled={isLoading}>
-            Comprar agora
-          </button>
+          <button onClick={handleAddToCart}>Colocar na sacola</button>
         </ProductDetails>
       </ProductContainer>
     </Fragment>
